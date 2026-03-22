@@ -41,7 +41,7 @@ export default function AdminLoginPage() {
 
       alert("Login successful");
 
-      router.push("/admin/products");
+      router.push("/admin/add-products");
     } catch (err: any) {
       console.error(err);
       alert(err.message || "Login failed");

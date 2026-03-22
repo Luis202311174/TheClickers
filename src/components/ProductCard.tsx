@@ -2,10 +2,12 @@
 
 import Image from "next/image";
 import { Heart, ShoppingCart } from "lucide-react";
+import Link from "next/link";
 
 type Product = {
   id: string;
   name: string;
+  slug: string;
   description?: string | null;
   category?: string | null;
   price: number;
@@ -19,7 +21,6 @@ type Props = {
   isFavorite: boolean;
   onToggleFavorite: (id: string) => void;
   onAddToCart?: (productId: string) => void;
-  onView?: (productId: string) => void;
 };
 
 export default function ProductCard({
@@ -27,7 +28,6 @@ export default function ProductCard({
   isFavorite,
   onToggleFavorite,
   onAddToCart,
-  onView,
 }: Props) {
   const imageSrc = product.image_url || "/logo.png";
 
@@ -63,13 +63,7 @@ export default function ProductCard({
         </button>
 
         {/* Hover Actions */}
-        <div
-          className="
-            absolute bottom-0 left-0 right-0 p-4 
-            bg-gradient-to-t from-black/60 to-transparent 
-            opacity-0 group-hover:opacity-100 transition
-          "
-        >
+        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition">
           <button
             onClick={() => onAddToCart?.(product.id)}
             className="w-full flex items-center justify-center gap-2 text-white py-2 rounded-md bg-[#7B8FA3] hover:opacity-90"
@@ -81,7 +75,7 @@ export default function ProductCard({
       </div>
 
       {/* INFO */}
-      <div className="p-4">
+      <div className="p-4 flex flex-col flex-1">
         <p className="text-sm text-gray-500 mb-1">
           {product.category || "Uncategorized"}
         </p>
@@ -94,13 +88,14 @@ export default function ProductCard({
           </span>
         </div>
 
-        <div className="flex gap-2">
-          <button
-            onClick={() => onView?.(product.id)}
-            className="flex-1 border border-gray-300 py-2 rounded-md hover:bg-gray-50"
+        {/* ACTIONS */}
+        <div className="mt-auto flex gap-2">
+          <Link
+            href={`/products/${product.slug}`}
+            className="flex-1 border border-gray-300 py-2 rounded-md text-center hover:bg-gray-50"
           >
             View
-          </button>
+          </Link>
 
           <button
             onClick={() => onAddToCart?.(product.id)}
