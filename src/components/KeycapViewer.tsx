@@ -3,7 +3,7 @@
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Props = {
   imageUrl: string;
@@ -36,13 +36,11 @@ function KeycapModel({ imageUrl, offset, scale }: Props) {
       const image = tex.image as HTMLImageElement;
 
       const paddedCanvas = padImage(image, 64);
-
       const paddedTexture = new THREE.CanvasTexture(paddedCanvas);
 
       paddedTexture.flipY = false;
       paddedTexture.wrapS = paddedTexture.wrapT = THREE.ClampToEdgeWrapping;
       paddedTexture.anisotropy = 16;
-
       paddedTexture.needsUpdate = true;
 
       setTexture(paddedTexture);
@@ -79,15 +77,56 @@ export default function KeycapViewer({
   offset,
   scale,
 }: Props) {
+  const controlsRef = useRef<any>(null);
+  const [isCtrlPressed, setIsCtrlPressed] = useState(false);
+
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => setIsCtrlPressed(e.ctrlKey);
+    const up = () => setIsCtrlPressed(false);
+
+    window.addEventListener("keydown", down);
+    window.addEventListener("keyup", up);
+
+    return () => {
+      window.removeEventListener("keydown", down);
+      window.removeEventListener("keyup", up);
+    };
+  }, []);
+
+  // 🔥 Dynamically switch control mode
+  useEffect(() => {
+    if (!controlsRef.current) return;
+
+    if (isCtrlPressed) {
+      controlsRef.current.mouseButtons.LEFT = THREE.MOUSE.PAN;
+    } else {
+      controlsRef.current.mouseButtons.LEFT = THREE.MOUSE.ROTATE;
+    }
+  }, [isCtrlPressed]);
+
   return (
-    <div className="w-full h-[500px]" onContextMenu={(e) => e.preventDefault()}>
+    <div
+      className="w-full h-[500px]"
+      onContextMenu={(e) => e.preventDefault()}
+      onMouseDown={(e) => {
+        if (e.button === 2) e.preventDefault();
+      }}
+    >
       <Canvas camera={{ position: [-6, 6, 3], fov: 18 }}>
         <ambientLight intensity={0.7} />
         <directionalLight position={[2, 2, 2]} />
 
         <KeycapModel imageUrl={imageUrl} offset={offset} scale={scale} />
 
-        <OrbitControls />
+        <OrbitControls
+          ref={controlsRef}
+          enablePan={true} // always enabled, we control it manually
+          mouseButtons={{
+            LEFT: THREE.MOUSE.ROTATE,
+            MIDDLE: THREE.MOUSE.DOLLY,
+            RIGHT: -1 as any // ✅ actually disable right click internally
+          }}
+        />
       </Canvas>
     </div>
   );

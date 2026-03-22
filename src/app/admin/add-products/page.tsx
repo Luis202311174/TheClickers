@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import KeycapViewer from "@/components/KeycapViewer";
 import Header from "@/components/Header";
+import { HelpCircle } from "lucide-react";
 
 export default function AdminProductsPage() {
   const [form, setForm] = useState({
@@ -154,9 +155,13 @@ export default function AdminProductsPage() {
 
       {/* LEFT - PREVIEW */}
       <div className="bg-white border border-gray-200 rounded-lg p-4">
-        <h2 className="text-lg font-medium mb-3">Live Preview</h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-medium">Live Preview</h2>
+        </div>
 
-        <div className="border border-gray-200 rounded-lg overflow-hidden">
+        <div className="border border-gray-200 rounded-lg overflow-hidden relative group">
+
+          {/* 3D VIEWER */}
           <KeycapViewer
             imageUrl={previewUrl || "/logo.png"}
             offset={offset}
@@ -169,6 +174,23 @@ export default function AdminProductsPage() {
           className="mt-4 space-y-4 select-none"
           onContextMenu={(e) => e.preventDefault()}
         >
+          {/* HELP */}
+          <div className="relative group">
+            <button className="bg-white border border-gray-300 rounded-full p-2 shadow hover:bg-gray-100 transition">
+              <HelpCircle className="w-4 h-4 text-gray-600" />
+            </button>
+
+            {/* TOOLTIP */}
+            <div className="absolute left-0 mt-2 w-56 bg-black text-white text-xs rounded-lg p-3 opacity-0 group-hover:opacity-100 transition pointer-events-none">
+              <p className="font-semibold mb-1">Controls for Live Preview:</p>
+              <ul className="space-y-1">
+                <li>Left Click</li>
+                <li className="ml-4">Drag: Rotate</li>
+                <li className="ml-4">Ctrl + Drag: Pan</li>
+                <li className="mt-1">Scroll: Zoom</li>
+              </ul>
+            </div>
+          </div>
           
           <div>
             <label className="text-sm text-gray-600">
