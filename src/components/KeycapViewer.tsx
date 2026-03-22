@@ -80,14 +80,18 @@ export default function KeycapViewer({
   scale,
 }: Props) {
   return (
-    <div className="w-full h-[500px]">
+    <div
+      className="w-full h-[500px] select-none"
+      onContextMenu={(e) => e.preventDefault()}
+      onDragStart={(e) => e.preventDefault()}
+    >
       <Canvas camera={{ position: [-6, 6, 3], fov: 18 }}>
         <ambientLight intensity={0.7} />
         <directionalLight position={[2, 2, 2]} />
 
         <KeycapModel imageUrl={imageUrl} offset={offset} scale={scale} />
 
-        <OrbitControls />
+        <OrbitControls enablePan={false} />
       </Canvas>
     </div>
   );

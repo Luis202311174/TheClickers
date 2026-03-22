@@ -165,7 +165,10 @@ export default function AdminProductsPage() {
         </div>
 
         {/* SLIDERS */}
-        <div className="mt-4 space-y-4">
+        <div
+          className="mt-4 space-y-4 select-none"
+          onContextMenu={(e) => e.preventDefault()}
+        >
           
           <div>
             <label className="text-sm text-gray-600">
@@ -184,6 +187,8 @@ export default function AdminProductsPage() {
                 }))
               }
               className="w-full"
+              draggable={false}
+              onDragStart={(e) => e.preventDefault()}
             />
           </div>
 
@@ -204,6 +209,8 @@ export default function AdminProductsPage() {
                 }))
               }
               className="w-full"
+              draggable={false}
+              onDragStart={(e) => e.preventDefault()}
             />
           </div>
 
@@ -219,6 +226,8 @@ export default function AdminProductsPage() {
               value={scale}
               onChange={(e) => setScale(parseFloat(e.target.value))}
               className="w-full"
+              draggable={false}
+              onDragStart={(e) => e.preventDefault()}
             />
           </div>
 
