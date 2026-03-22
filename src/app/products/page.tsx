@@ -10,6 +10,7 @@ import { supabase } from "@/lib/supabaseClient";
 type Product = {
   id: string;
   name: string;
+  slug: string;
   description?: string | null;
   category?: string | null;
   price: number;
