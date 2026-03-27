@@ -18,28 +18,52 @@ interface Product {
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingIds, setDeletingIds] = useState<string[]>([]); // track deleting products
+
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabaseAdmin
+        .from("products")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      setProducts(data || []);
+    } catch (err) {
+      console.error("Error fetching products:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      try {
-        const { data, error } = await supabaseAdmin
-          .from("products")
-          .select("*")
-          .order("created_at", { ascending: false });
-
-        if (error) throw error;
-
-        setProducts(data || []);
-      } catch (err) {
-        console.error("Error fetching products:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchProducts();
   }, []);
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this product?")) return;
+
+    try {
+      setDeletingIds((prev) => [...prev, id]); // mark as deleting
+
+      const { error } = await supabaseAdmin
+        .from("products")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      // Optimistic UI update
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+    } catch (err) {
+      console.error("Error deleting product:", err);
+      alert("Failed to delete product. See console for details.");
+    } finally {
+      setDeletingIds((prev) => prev.filter((pid) => pid !== id));
+    }
+  };
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -66,7 +90,7 @@ export default function AdminProductsPage() {
               {products.map((product) => (
                 <div
                   key={product.id}
-                  className="bg-white rounded-lg shadow hover:shadow-md transition p-4 flex flex-col"
+                  className="bg-white rounded-lg shadow hover:shadow-md transition p-4 flex flex-col relative"
                 >
                   <img
                     src={product.image_url || "/default-product.png"}
@@ -91,6 +115,19 @@ export default function AdminProductsPage() {
                       Pre-order
                     </span>
                   )}
+
+                  {/* Delete Button */}
+                  <button
+                    onClick={() => handleDelete(product.id)}
+                    disabled={deletingIds.includes(product.id)}
+                    className={`mt-3 w-full py-1 text-white rounded-lg text-sm ${
+                      deletingIds.includes(product.id)
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-red-600 hover:bg-red-700"
+                    } transition`}
+                  >
+                    {deletingIds.includes(product.id) ? "Deleting..." : "Delete"}
+                  </button>
                 </div>
               ))}
             </div>

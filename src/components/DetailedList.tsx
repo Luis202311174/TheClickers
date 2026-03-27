@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useState } from "react";
+import PreOrderPreviewModal from "./PreOrderPreviewModal";
 
 export type PreOrderStatus =
   | "pending"
@@ -29,6 +31,9 @@ type PreOrder = {
   quantity: number;
   total_price: number;
   product: Product;
+  offset_x?: number;
+  offset_y?: number;
+  scale?: number;
 };
 
 type Props = {
@@ -43,6 +48,8 @@ export default function DetailedList({ order, onStatusChange }: Props) {
     price: 0,
     image_url: "/logo.png",
   };
+
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const statusColors: Record<PreOrderStatus, string> = {
     pending: "bg-yellow-400",
@@ -72,6 +79,7 @@ export default function DetailedList({ order, onStatusChange }: Props) {
   const nextAction = getNextAction();
 
   return (
+    <>
     <motion.div
       layout
       initial={{ opacity: 0, y: 10 }}
@@ -80,7 +88,10 @@ export default function DetailedList({ order, onStatusChange }: Props) {
       className="flex gap-4 p-4 border border-gray-200 rounded-lg shadow-sm bg-white hover:shadow-md transition"
     >
       {/* IMAGE */}
-      <div className="relative w-28 h-28 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
+      <div
+        className="relative w-28 h-28 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 cursor-pointer"
+        onClick={() => setPreviewOpen(true)}
+      >
         <Image
           src={product.image_url || "/logo.png"}
           alt={product.name}
@@ -143,5 +154,17 @@ export default function DetailedList({ order, onStatusChange }: Props) {
         </div>
       </div>
     </motion.div>
+      <PreOrderPreviewModal
+        isOpen={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        previewUrl={product.image_url || null}
+        keycapColor={order.keycap_color}
+        switchColor={order.switch_color}
+        caseColor={order.case_color}
+        offsetX={order.offset_x || 0}
+        offsetY={order.offset_y || 0}
+        scale={order.scale || 1}
+      />
+    </>
   );
 }

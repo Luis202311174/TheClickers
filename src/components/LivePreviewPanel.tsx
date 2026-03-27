@@ -21,10 +21,10 @@ type Props = {
       casing: string;
     }>
   >;
-
   isAdmin?: boolean;
   showSliders?: boolean;
   showReset?: boolean;
+  hideUnusedPresets?: boolean; // NEW
 };
 
 export default function LivePreviewPanel({
@@ -38,6 +38,7 @@ export default function LivePreviewPanel({
   isAdmin = false,
   showSliders = true,
   showReset = true,
+  hideUnusedPresets = false,
 }: Props) {
   const KEYCAP_PRESETS = [
     { name: "Orange", value: "#ff8400" },
@@ -52,6 +53,22 @@ export default function LivePreviewPanel({
     { name: "Brown", value: "#9e5400" },
     { name: "Blue", value: "#00a0eb" },
   ];
+
+  const safeOffsetX = typeof offset?.x === "number" ? offset.x : 0;
+  const safeOffsetY = typeof offset?.y === "number" ? offset.y : 0;
+
+  // Filter presets if we want only the active one
+  const keycapPresetsToShow = hideUnusedPresets
+    ? KEYCAP_PRESETS.filter((p) => p.value === colors.keycap)
+    : KEYCAP_PRESETS;
+
+  const switchPresetsToShow = hideUnusedPresets
+    ? SWITCH_PRESETS.filter((p) => p.value === colors.switch)
+    : SWITCH_PRESETS;
+
+  const casingPresetsToShow = hideUnusedPresets
+    ? KEYCAP_PRESETS.filter((p) => p.value === colors.casing)
+    : KEYCAP_PRESETS;
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-4">
@@ -105,91 +122,80 @@ export default function LivePreviewPanel({
         onContextMenu={(e) => e.preventDefault()}
       >
 
-        {/* KEYCAP COLOR */}
-        <div>
-          <label className="text-sm text-gray-600 block mb-2">
-            Keycap Color
-          </label>
+        {!hideUnusedPresets && (
+          <div className="mt-4 space-y-4 select-none" onContextMenu={(e) => e.preventDefault()}>
+            {/* Keycap */}
+            <div>
+              <label className="text-sm text-gray-600 block mb-2">Keycap Color</label>
+              <div className="flex gap-2 flex-wrap">
+                {keycapPresetsToShow.map((preset) => (
+                  <button
+                    key={preset.value}
+                    onClick={() =>
+                      setColors((prev) => ({ ...prev, keycap: preset.value }))
+                    }
+                    className={`w-8 h-8 rounded-full border-2 ${
+                      colors.keycap === preset.value ? "border-black scale-110" : "border-gray-300"
+                    }`}
+                    style={{ backgroundColor: preset.value }}
+                  />
+                ))}
+              </div>
+            </div>
 
-          <div className="flex gap-2 flex-wrap">
-            {KEYCAP_PRESETS.map((preset) => (
-              <button
-                key={preset.value}
-                onClick={() =>
-                  setColors((prev) => ({ ...prev, keycap: preset.value }))
-                }
-                className={`w-8 h-8 rounded-full border-2 ${
-                  colors.keycap === preset.value
-                    ? "border-black scale-110"
-                    : "border-gray-300"
-                }`}
-                style={{ backgroundColor: preset.value }}
-              />
-            ))}
+            {/* Switch */}
+            <div>
+              <label className="text-sm text-gray-600 block mb-2">Switch Type</label>
+              <div className="flex gap-2 flex-wrap">
+                {switchPresetsToShow.map((preset) => (
+                  <button
+                    key={preset.value}
+                    onClick={() =>
+                      setColors((prev) => ({ ...prev, switch: preset.value }))
+                    }
+                    className={`w-8 h-8 rounded-full border-2 ${
+                      colors.switch === preset.value ? "border-black scale-110" : "border-gray-300"
+                    }`}
+                    style={{ backgroundColor: preset.value }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Casing */}
+            <div>
+              <label className="text-sm text-gray-600 block mb-2">Casing Color</label>
+              <div className="flex gap-2 flex-wrap">
+                {casingPresetsToShow.map((preset) => (
+                  <button
+                    key={preset.value}
+                    onClick={() =>
+                      setColors((prev) => ({ ...prev, casing: preset.value }))
+                    }
+                    className={`w-8 h-8 rounded-full border-2 ${
+                      colors.casing === preset.value ? "border-black scale-110" : "border-gray-300"
+                    }`}
+                    style={{ backgroundColor: preset.value }}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
-
-        {/* SWITCH */}
-        <div>
-          <label className="text-sm text-gray-600 block mb-2">
-            Switch Type
-          </label>
-
-          <div className="flex gap-2 flex-wrap">
-            {SWITCH_PRESETS.map((preset) => (
-              <button
-                key={preset.value}
-                onClick={() =>
-                  setColors((prev) => ({ ...prev, switch: preset.value }))
-                }
-                className={`w-8 h-8 rounded-full border-2 ${
-                  colors.switch === preset.value
-                    ? "border-black scale-110"
-                    : "border-gray-300"
-                }`}
-                style={{ backgroundColor: preset.value }}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* CASING */}
-        <div>
-          <label className="text-sm text-gray-600 block mb-2">
-            Casing Color
-          </label>
-
-          <div className="flex gap-2 flex-wrap">
-            {KEYCAP_PRESETS.map((preset) => (
-              <button
-                key={preset.value}
-                onClick={() =>
-                  setColors((prev) => ({ ...prev, casing: preset.value }))
-                }
-                className={`w-8 h-8 rounded-full border-2 ${
-                  colors.casing === preset.value
-                    ? "border-black scale-110"
-                    : "border-gray-300"
-                }`}
-                style={{ backgroundColor: preset.value }}
-              />
-            ))}
-          </div>
-        </div>
+        )}
 
         {showSliders && (
             <>
         {/* SLIDERS */}
         <div>
           <label className="text-sm text-gray-600">
-            Move X ({offset.x.toFixed(2)})
+            Move X ({safeOffsetX.toFixed(2)})
           </label>
           <input
             type="range"
             min={-1}
             max={1}
             step={0.01}
-            value={offset.x}
+            value={safeOffsetX}
             onChange={(e) =>
               setOffset((prev) => ({
                 ...prev,
@@ -202,14 +208,14 @@ export default function LivePreviewPanel({
 
         <div>
           <label className="text-sm text-gray-600">
-            Move Y ({offset.y.toFixed(2)})
+            Move Y ({safeOffsetY.toFixed(2)})
           </label>
           <input
             type="range"
             min={-1}
             max={1}
             step={0.01}
-            value={offset.y}
+            value={safeOffsetY}
             onChange={(e) =>
               setOffset((prev) => ({
                 ...prev,
