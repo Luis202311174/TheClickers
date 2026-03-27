@@ -3,24 +3,39 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import { syncProfile } from "@/utils/syncProfile";
 
 export default function AuthCallback() {
   const router = useRouter();
 
   useEffect(() => {
     const handleAuth = async () => {
-      // 🔥 This is the missing piece
-      const { data, error } = await supabase.auth.getSession();
+      try {
+        // ✅ get session AFTER OAuth redirect
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
 
-      if (error) {
-        console.error(error);
-        return;
+        if (error) {
+          console.error("Session error:", error.message);
+          return;
+        }
+
+        const user = session?.user;
+
+        // 🔥 THIS is the important part
+        if (user) {
+          await syncProfile(user);
+        }
+
+        // optional but fine
+        await supabase.auth.refreshSession();
+
+        router.replace("/");
+      } catch (err) {
+        console.error("OAuth callback error:", err);
       }
-
-      // Optional: force refresh session (helps sometimes)
-      await supabase.auth.refreshSession();
-
-      router.replace("/");
     };
 
     handleAuth();

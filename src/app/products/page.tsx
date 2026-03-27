@@ -6,6 +6,7 @@ import ProductCard from "@/components/ProductCard";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { supabase } from "@/lib/supabaseClient";
+import { fetchProducts } from "@/utils/fetchProducts";
 
 type Product = {
   id: string;
@@ -27,27 +28,21 @@ export default function ProductsPage() {
 
   const categories = ["All", "Electronics", "Accessories"];
 
-  // ---------------- FETCH PRODUCTS ----------------
   useEffect(() => {
-    const fetchProducts = async () => {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.error(error);
-      } else {
+    const load = async () => {
+      try {
+        const data = await fetchProducts();
         setProducts(data || []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     };
 
-    fetchProducts();
+    load();
   }, []);
 
-  // ---------------- FAVORITES ----------------
   const toggleFavorite = (id: string) => {
     setFavorites((prev) =>
       prev.includes(id)
@@ -56,7 +51,6 @@ export default function ProductsPage() {
     );
   };
 
-  // ---------------- FILTERING ----------------
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
       product.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -68,7 +62,6 @@ export default function ProductsPage() {
     return matchesSearch && matchesCategory;
   });
 
-  // ---------------- RENDER ----------------
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
 
