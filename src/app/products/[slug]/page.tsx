@@ -11,9 +11,10 @@ import { useAuth } from "@/hooks/useAuth";
 
 export default function ProductPage() {
   const { slug } = useParams();
-  const { user, loading } = useAuth(); // ✅ Get logged-in user
+  const { user, loading } = useAuth();
 
   const [product, setProduct] = useState<any>(null);
+
   const [colors, setColors] = useState({
     keycap: "#ffffff",
     switch: "#e30000",
@@ -23,20 +24,23 @@ export default function ProductPage() {
   // ✅ FETCH PRODUCT
   useEffect(() => {
     if (!slug) return;
+
     const load = async () => {
       const data = await fetchProductBySlug(slug as string);
       setProduct(data);
     };
+
     load();
   }, [slug]);
 
-  // ✅ SYNC COLORS AFTER PRODUCT LOADS
+  // ✅ SYNC COLORS SAFELY AFTER PRODUCT LOADS
   useEffect(() => {
     if (!product) return;
+
     setColors({
-      keycap: product.keycap_color || "#ffffff",
-      switch: product.switch_color || "#e30000",
-      casing: product.switch_casing_color || "#ffffff",
+      keycap: product.keycap_color ?? "#ffffff",
+      switch: product.switch_color ?? "#e30000",
+      casing: product.switch_casing_color ?? "#ffffff",
     });
   }, [product]);
 
@@ -56,11 +60,18 @@ export default function ProductPage() {
       return;
     }
 
+    // ✅ Ensure no undefined values ever get sent
+    const safeColors = {
+      keycap: colors.keycap || "#ffffff",
+      switch: colors.switch || "#e30000",
+      casing: colors.casing || "#ffffff",
+    };
+
     try {
       const order = await createPreOrder({
         userId: user.id,
         productId: product.id,
-        colors,
+        colors: safeColors,
         quantity: 1,
       });
 

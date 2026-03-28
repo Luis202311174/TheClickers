@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import Header from "@/components/Header";
 import AdminSidebar from "@/components/AdminSidebar";
 
@@ -18,19 +17,20 @@ interface Product {
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [deletingIds, setDeletingIds] = useState<string[]>([]); // track deleting products
+  const [deletingIds, setDeletingIds] = useState<string[]>([]);
 
   const fetchProducts = async () => {
     setLoading(true);
+
     try {
-      const { data, error } = await supabaseAdmin
-        .from("products")
-        .select("*")
-        .order("created_at", { ascending: false });
+      const res = await fetch("/api/admin/products");
 
-      if (error) throw error;
+      if (!res.ok) {
+        throw new Error("Failed to fetch products");
+      }
 
-      setProducts(data || []);
+      const data = await res.json();
+      setProducts(data.products || []);
     } catch (err) {
       console.error("Error fetching products:", err);
     } finally {
@@ -46,20 +46,21 @@ export default function AdminProductsPage() {
     if (!confirm("Are you sure you want to delete this product?")) return;
 
     try {
-      setDeletingIds((prev) => [...prev, id]); // mark as deleting
+      setDeletingIds((prev) => [...prev, id]);
 
-      const { error } = await supabaseAdmin
-        .from("products")
-        .delete()
-        .eq("id", id);
+      const res = await fetch(`/api/admin/products/${id}`, {
+        method: "DELETE",
+      });
 
-      if (error) throw error;
+      if (!res.ok) {
+        throw new Error("Delete failed");
+      }
 
       // Optimistic UI update
       setProducts((prev) => prev.filter((p) => p.id !== id));
     } catch (err) {
       console.error("Error deleting product:", err);
-      alert("Failed to delete product. See console for details.");
+      alert("Failed to delete product.");
     } finally {
       setDeletingIds((prev) => prev.filter((pid) => pid !== id));
     }
@@ -67,15 +68,11 @@ export default function AdminProductsPage() {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      {/* ✅ Fixed Sidebar */}
       <AdminSidebar />
 
-      {/* ✅ Right side */}
       <div className="flex-1 flex flex-col ml-64">
-        {/* ✅ Sticky Header */}
         <Header />
 
-        {/* ✅ Scrollable Content */}
         <main className="flex-1 overflow-auto p-8">
           <h1 className="text-3xl font-bold text-[#7B8FA3] mb-6">
             Products
@@ -116,7 +113,6 @@ export default function AdminProductsPage() {
                     </span>
                   )}
 
-                  {/* Delete Button */}
                   <button
                     onClick={() => handleDelete(product.id)}
                     disabled={deletingIds.includes(product.id)}
@@ -126,7 +122,9 @@ export default function AdminProductsPage() {
                         : "bg-red-600 hover:bg-red-700"
                     } transition`}
                   >
-                    {deletingIds.includes(product.id) ? "Deleting..." : "Delete"}
+                    {deletingIds.includes(product.id)
+                      ? "Deleting..."
+                      : "Delete"}
                   </button>
                 </div>
               ))}

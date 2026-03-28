@@ -18,7 +18,7 @@ type Product = {
 export type PreOrderStatus =
   | "pending"
   | "confirmed"
-  | "processing"
+  | "in_production"
   | "ready_for_pick_up"
   | "claimed"
   | "cancelled"
@@ -36,7 +36,7 @@ export default function PreOrderCard({ product, status, onView }: Props) {
   const statusColors: Record<PreOrderStatus, string> = {
     pending: "bg-yellow-400",
     confirmed: "bg-blue-400",
-    processing: "bg-orange-400",
+    in_production: "bg-orange-400",
     ready_for_pick_up: "bg-green-500",
     claimed: "bg-gray-700",
     cancelled: "bg-red-500",

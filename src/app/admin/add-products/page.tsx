@@ -2,10 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { createClient } from "@supabase/supabase-js";
 import Header from "@/components/Header";
 import AdminSidebar from "@/components/AdminSidebar";
 import LivePreviewPanel from "@/components/LivePreviewPanel";
+
+// ✅ Client-safe Supabase instance (anon key only)
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export default function AdminProductsPage() {
   const [form, setForm] = useState({
@@ -30,19 +36,24 @@ export default function AdminProductsPage() {
 
   const router = useRouter();
 
-  // Admin-only session check
+  // ✅ Admin check (client-safe)
   useEffect(() => {
     const checkAdmin = async () => {
-      const { data: { user } } = await supabaseAdmin.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) return router.push("/admin/login");
 
-      const { data: profile, error } = await supabaseAdmin
+      const { data: profile, error } = await supabase
         .from("profiles")
         .select("role")
         .eq("id", user.id)
         .single();
 
-      if (error || profile?.role !== "admin") router.push("/admin/login");
+      if (error || profile?.role !== "admin") {
+        router.push("/admin/login");
+      }
     };
 
     checkAdmin();
@@ -56,7 +67,7 @@ export default function AdminProductsPage() {
   }, [previewUrl]);
 
   const handleChange = (field: string, value: any) => {
-    setForm(prev => ({ ...prev, [field]: value }));
+    setForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleFileChange = (file: File | null) => {
@@ -65,51 +76,60 @@ export default function AdminProductsPage() {
     setPreviewUrl(URL.createObjectURL(file));
   };
 
-  const handleUpload = async () => {
-    if (!imageFile) return null;
-
-    const fileName = `${Date.now()}-${imageFile.name}`;
-    const { error } = await supabaseAdmin.storage.from("product-images").upload(fileName, imageFile);
-
-    if (error) {
-      console.error("Upload error:", error);
-      return null;
-    }
-
-    const { data } = supabaseAdmin.storage.from("product-images").getPublicUrl(fileName);
-    return data.publicUrl;
-  };
-
   const generateSlug = (name: string) =>
-    name.toLowerCase().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-");
+    name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-");
 
+  // ✅ Upload + insert handled via API route
   const handleSubmit = async () => {
     try {
       setLoading(true);
-      const imageUrl = await handleUpload();
-      if (!imageUrl) throw new Error("Image upload failed");
+
+      if (!imageFile) throw new Error("No image selected");
 
       const slug = generateSlug(form.name);
-      const { error } = await supabaseAdmin.from("products").insert({
-        name: form.name,
-        description: form.description,
-        price: parseFloat(form.price),
-        category: form.category,
-        is_preorder: form.isPreorder,
-        image_url: imageUrl,
-        offset_x: offset.x,
-        offset_y: offset.y,
-        scale,
-        slug,
-            });
 
-      if (error) throw error;
+      const fileName = `${Date.now()}-${imageFile.name}`;
+
+      const formData = new FormData();
+      formData.append("file", imageFile);
+      formData.append("fileName", fileName);
+
+      formData.append(
+        "payload",
+        JSON.stringify({
+          ...form,
+          price: parseFloat(form.price),
+          offset_x: offset.x,
+          offset_y: offset.y,
+          scale,
+          slug,
+        })
+      );
+
+      const res = await fetch("/api/admin/add-products", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Failed to create product");
 
       alert("Product added!");
+
+      // reset state
       setImageFile(null);
       setPreviewUrl(null);
       setOffset({ x: 0, y: 0 });
       setScale(1);
+      setForm({
+        name: "",
+        description: "",
+        price: "",
+        category: "Accessories",
+        isPreorder: true,
+      });
     } catch (err) {
       console.error(err);
       alert("Error adding product");
@@ -120,19 +140,19 @@ export default function AdminProductsPage() {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      {/* Sidebar fixed */}
       <AdminSidebar />
 
-      {/* Right content area */}
       <div className="flex-1 flex flex-col ml-64">
-        {/* Header sticky */}
         <Header />
 
-        {/* Scrollable main content */}
         <main className="flex-1 overflow-auto p-8">
           <section className="bg-white py-6 px-6 rounded-lg shadow mb-8">
-            <h1 className="text-3xl font-bold text-[#7B8FA3] mb-2">Add New Product</h1>
-            <p className="text-gray-600">Create and customize your keycap design</p>
+            <h1 className="text-3xl font-bold text-[#7B8FA3] mb-2">
+              Add New Product
+            </h1>
+            <p className="text-gray-600">
+              Create and customize your keycap design
+            </p>
           </section>
 
           <div className="grid lg:grid-cols-2 gap-10">
@@ -148,7 +168,7 @@ export default function AdminProductsPage() {
               isAdmin={true}
             />
 
-            {/* Product form */}
+            {/* Form */}
             <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-5">
               <h2 className="text-lg font-medium">Product Details</h2>
 
@@ -188,7 +208,9 @@ export default function AdminProductsPage() {
                 <input
                   type="checkbox"
                   checked={form.isPreorder}
-                  onChange={(e) => handleChange("isPreorder", e.target.checked)}
+                  onChange={(e) =>
+                    handleChange("isPreorder", e.target.checked)
+                  }
                 />
                 Pre-order item
               </label>
@@ -198,9 +220,15 @@ export default function AdminProductsPage() {
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
+                  onChange={(e) =>
+                    handleFileChange(e.target.files?.[0] || null)
+                  }
                 />
-                {imageFile && <p className="text-xs text-gray-500 mt-1">{imageFile.name}</p>}
+                {imageFile && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    {imageFile.name}
+                  </p>
+                )}
               </div>
 
               <button

@@ -36,19 +36,26 @@ export default function Header() {
             {/* Navigation */}
             <div className="hidden md:flex items-center gap-6">
               {/* Regular nav links for non-admins */}
-              {!isAdminUser && (
-                <>
-                  <Link href="/" className="text-gray-700 hover:text-gray-900 transition">
-                    Home
-                  </Link>
-                  <Link href="/products" className="text-gray-700 hover:text-gray-900 transition">
-                    Products
-                  </Link>
-                  <Link href="/#about" className="text-gray-700 hover:text-gray-900 transition">
-                    About
-                  </Link>
-                </>
-              )}
+            {!isAdminUser && (
+  <>
+    <Link href="/" className="text-gray-700 hover:text-gray-900 transition">
+      Home
+    </Link>
+
+    <Link href="/products" className="text-gray-700 hover:text-gray-900 transition">
+      Products
+    </Link>
+
+    {/* ✅ NEW */}
+    <Link href="/custom-design" className="text-gray-700 hover:text-gray-900 transition">
+      Custom Stickers
+    </Link>
+
+    <Link href="/#about" className="text-gray-700 hover:text-gray-900 transition">
+      About
+    </Link>
+  </>
+)}
 
               {/* Auth / Avatar */}
               {loading ? (

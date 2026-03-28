@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabaseClient";
 export type PreOrderStatus =
   | "pending"
   | "confirmed"
-  | "processing"
+  | "in_production"
   | "ready_for_pick_up"
   | "claimed"
   | "cancelled"

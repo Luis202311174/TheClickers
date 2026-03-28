@@ -13,7 +13,7 @@ const sidebarItems: SidebarItem[] = [
   { label: "Products", path: "/admin/products" },
   { label: "Add Product", path: "/admin/add-products" },
   { label: "Pre-Orders", path: "/admin/pre-orders" },
-  { label: "Requests", path: "/admin/requests" },
+  { label: "Requests", path: "/admin/customer-requests" },
 ];
 
 export default function AdminSidebar() {

@@ -8,7 +8,7 @@ import PreOrderPreviewModal from "./PreOrderPreviewModal";
 export type PreOrderStatus =
   | "pending"
   | "confirmed"
-  | "processing"
+  | "in_production"
   | "ready_for_pick_up"
   | "claimed"
   | "cancelled"
@@ -39,6 +39,7 @@ type PreOrder = {
 type Props = {
   order: PreOrder;
   onStatusChange: (id: string, status: PreOrderStatus) => void;
+  isUpdating?: boolean; // ✅ add this
 };
 
 export default function DetailedList({ order, onStatusChange }: Props) {
@@ -54,7 +55,7 @@ export default function DetailedList({ order, onStatusChange }: Props) {
   const statusColors: Record<PreOrderStatus, string> = {
     pending: "bg-yellow-400",
     confirmed: "bg-blue-400",
-    processing: "bg-orange-400",
+    in_production: "bg-orange-400",
     ready_for_pick_up: "bg-green-500",
     claimed: "bg-gray-700",
     cancelled: "bg-red-400",
@@ -66,8 +67,8 @@ export default function DetailedList({ order, onStatusChange }: Props) {
       case "pending":
         return { label: "Accept", value: "confirmed" };
       case "confirmed":
-        return { label: "Start Production", value: "processing" };
-      case "processing":
+        return { label: "Start Production", value: "in_production" };
+      case "in_production":
         return { label: "Ready for Pickup", value: "ready_for_pick_up" };
       case "ready_for_pick_up":
         return { label: "Mark Claimed", value: "claimed" };
