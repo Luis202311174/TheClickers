@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 
 export default function AdminLoginPage() {
@@ -15,7 +15,8 @@ export default function AdminLoginPage() {
     try {
       setLoading(true);
 
-      const { data, error } = await supabaseAdmin.auth.signInWithPassword({
+      // ✅ SAFE: client auth
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -23,10 +24,10 @@ export default function AdminLoginPage() {
       if (error) throw error;
 
       const user = data.user;
-
       if (!user) throw new Error("No user returned");
 
-      const { data: profile, error: profileError } = await supabaseAdmin
+      // ✅ role check (must allow via RLS)
+      const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("role")
         .eq("id", user.id)
@@ -38,12 +39,15 @@ export default function AdminLoginPage() {
         throw new Error("Unauthorized: Not an admin");
       }
 
-      alert("Admin login successful");
-
-      router.push("/admin/add-products");
-    } catch (err: any) {
+      router.push("/admin");
+    } catch (err: unknown) {
       console.error(err);
-      alert(err.message || "Login failed");
+
+      if (err instanceof Error) {
+        alert(err.message);
+      } else {
+        alert("Login failed");
+      }
     } finally {
       setLoading(false);
     }
