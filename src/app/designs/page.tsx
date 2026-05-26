@@ -15,7 +15,6 @@ const supabase = createClient(
 
 type Design = {
   id: string;
-  preferred_sticker: string;
   description: string;
   design_image_url: string | null;
   status: DraftDesignStatus;
@@ -29,7 +28,7 @@ type Design = {
   scale?: number;
 };
 
-export default function MyDraftDesignsPage() {
+export default function MyDesignsPage() {
   const router = useRouter();
 
   const [user, setUser] = useState<any>(null);
@@ -37,7 +36,7 @@ export default function MyDraftDesignsPage() {
   const [loading, setLoading] = useState(true);
   const [selectedDesign, setSelectedDesign] = useState<Design | null>(null);
 
-  // ✅ Auth
+  // AUTH
   useEffect(() => {
     const init = async () => {
       const {
@@ -55,7 +54,7 @@ export default function MyDraftDesignsPage() {
     init();
   }, [router]);
 
-  // ✅ Fetch ALL designs (not just drafts)
+  // FETCH USER DESIGNS
   useEffect(() => {
     if (!user) return;
 
@@ -69,7 +68,7 @@ export default function MyDraftDesignsPage() {
         .order("created_at", { ascending: false });
 
       if (error) {
-        console.error(error);
+        console.error("FETCH ERROR:", error);
       } else {
         setDesigns(data || []);
       }
@@ -80,7 +79,7 @@ export default function MyDraftDesignsPage() {
     fetchDesigns();
   }, [user]);
 
-  // ✅ Send request (draft → pending)
+  // SEND FOR REVIEW
   const sendRequest = async (id: string) => {
     const { error } = await supabase
       .from("customer_designs")
@@ -95,7 +94,6 @@ export default function MyDraftDesignsPage() {
 
     alert("Design sent for review!");
 
-    // Optimistically update UI instead of removing
     setDesigns((prev) =>
       prev.map((d) =>
         d.id === id ? { ...d, status: "pending" } : d
@@ -120,10 +118,10 @@ export default function MyDraftDesignsPage() {
       <Header />
 
       <div className="max-w-7xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        
+
         {designs.length === 0 && (
           <p className="col-span-full text-center text-gray-500">
-            No designs found.
+            No designs yet.
           </p>
         )}
 
@@ -143,11 +141,11 @@ export default function MyDraftDesignsPage() {
 
       <Footer />
 
-      {/* KEYCAP 3D MODAL */}
+      {/* MODAL */}
       {selectedDesign && (
         <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg w-full max-w-3xl p-6 relative">
-            
+
             <button
               className="absolute top-3 right-3 text-xl font-bold"
               onClick={() => setSelectedDesign(null)}
@@ -156,7 +154,7 @@ export default function MyDraftDesignsPage() {
             </button>
 
             <h2 className="text-2xl font-bold mb-4">
-              {selectedDesign.preferred_sticker}
+              Custom Design
             </h2>
 
             <KeycapViewer

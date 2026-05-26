@@ -36,12 +36,10 @@ export default function Home() {
           <source src="/HeroBCKGRNDRight.mp4" type="video/mp4" />
         </video>
 
-        <div className="absolute inset-0 bg-black/40 z-10" />
-
         <div className="relative z-20 max-w-7xl mx-auto px-6 lg:px-8 w-full">
           <div className="grid md:grid-cols-2 gap-12 items-center">
 
-            <div className="text-white space-y-6">
+            <div className="text-[#7B8FA3] space-y-6">
               <h1 className="text-4xl md:text-6xl font-bold leading-tight">
                 Welcome to{" "}
                 <span className="block mt-2 text-[#7B8FA3]">
@@ -49,22 +47,15 @@ export default function Home() {
                 </span>
               </h1>
 
-              <p className="text-lg md:text-xl text-gray-200 max-w-lg">
+              <p className="text-xl text-[#7B8FA3] max-w-lg">
                 Pre-order exclusive products or request custom sticker designs tailored to your style.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
 
                 <Link
-                  href="/products"
-                  className="px-6 py-3 rounded-md bg-[#7B8FA3] text-white font-medium hover:opacity-90 text-center transition"
-                >
-                  Browse Products
-                </Link>
-
-                <Link
                   href="/custom-design"
-                  className="px-6 py-3 rounded-md border border-white text-white hover:bg-white/10 text-center transition"
+                  className="px-6 py-3 rounded-md bg-[#7B8FA3] text-white hover:bg-gray-100 text-center font-medium transition"
                 >
                   Custom Stickers
                 </Link>
@@ -106,7 +97,7 @@ export default function Home() {
             <div className="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition text-center">
               <PenTool className="w-6 h-6 mx-auto mb-4 text-[#7B8FA3]" />
               <h3 className="font-semibold mb-2">Custom Designs</h3>
-              <p className="text-gray-600">Request personalized sticker designs.</p>
+              <p className="text-gray-600">Personalize your keycap color!</p>
             </div>
 
           </div>
@@ -161,80 +152,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-     {/* GALLERY */}
-<section className="py-24 bg-gray-50">
-  <div className="max-w-7xl mx-auto px-6 lg:px-8">
-
-    <div className="text-center mb-16">
-      <h2 className="text-3xl md:text-4xl font-semibold text-[#7B8FA3] mb-4">
-        Sample Custom Stickers
-      </h2>
-      <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-        Examples of anime & meme-style designs you can request.
-      </p>
-    </div>
-
-    {/* ANIME SECTION */}
-    <div className="mb-16">
-      <h3 className="text-xl font-semibold text-[#7B8FA3] mb-6 text-center">
-        Anime Stickers
-      </h3>
-
-      <div className="grid grid-cols-2 gap-6 max-w-2xl mx-auto">
-        {[
-          "https://cdn.myanimelist.net/images/characters/10/246331.jpg",
-          "https://cdn.myanimelist.net/images/characters/8/73337.jpg",
-          "https://cdn.myanimelist.net/images/characters/6/174329.jpg",
-          "https://cdn.myanimelist.net/images/characters/4/51659.jpg",
-        ].map((src, i) => (
-          <div
-            key={`anime-${i}`}
-            className="relative aspect-square rounded-lg overflow-hidden shadow-sm hover:shadow-md transition"
-          >
-            <Image
-              src={src}
-              alt={`anime-sample-${i}`}
-              fill
-              className="object-cover"
-              unoptimized
-            />
-          </div>
-        ))}
-      </div>
-    </div>
-
-    {/* MEME SECTION */}
-    <div>
-      <h3 className="text-xl font-semibold text-[#7B8FA3] mb-6 text-center">
-        Meme Stickers
-      </h3>
-
-      <div className="grid grid-cols-2 gap-6 max-w-2xl mx-auto">
-        {[
-          "https://i.imgflip.com/30b1gx.jpg", // Drake meme
-          "https://i.imgflip.com/1ur9b0.jpg", // Distracted boyfriend
-          "https://i.imgflip.com/1bij.jpg",   // One does not simply
-          "https://i.imgflip.com/26am.jpg",   // Gru meme
-        ].map((src, i) => (
-          <div
-            key={`meme-${i}`}
-            className="relative aspect-square rounded-lg overflow-hidden shadow-sm hover:shadow-md transition"
-          >
-            <Image
-              src={src}
-              alt={`meme-sample-${i}`}
-              fill
-              className="object-cover"
-              unoptimized
-            />
-          </div>
-        ))}
-      </div>
-    </div>
-
-  </div>
-</section>
 
       {/* STATUS TRACKING TEASER */}
       <section className="py-24 bg-white">

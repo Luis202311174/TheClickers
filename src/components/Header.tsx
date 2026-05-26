@@ -42,10 +42,6 @@ export default function Header() {
       Home
     </Link>
 
-    <Link href="/products" className="text-gray-700 hover:text-gray-900 transition">
-      Products
-    </Link>
-
     {/* ✅ NEW */}
     <Link href="/custom-design" className="text-gray-700 hover:text-gray-900 transition">
       Custom Stickers

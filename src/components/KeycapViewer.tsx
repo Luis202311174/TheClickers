@@ -42,7 +42,7 @@ function KeycapModel({
   switchCasingColor,
   visibility,
 }: Props) {
-  const { scene } = useGLTF("/models/keycap3.glb");
+  const { scene } = useGLTF("/models/keycap9.glb");
 
   const [texture, setTexture] = useState<THREE.Texture | null>(null);
   const modelRef = useRef<THREE.Group>(null);
@@ -50,11 +50,10 @@ function KeycapModel({
   // Cache meshes/objects by type
   const meshesRef = useRef<{
     keycap: THREE.Mesh[];
-    sticker: THREE.Mesh[];
     switchObject: THREE.Object3D[];
     casing: THREE.Mesh[];
     chain: THREE.Mesh[];
-  }>({ keycap: [], sticker: [], switchObject: [], casing: [], chain: [] });
+  }>({ keycap: [], switchObject: [], casing: [], chain: [] });
 
   // Load user texture
   useEffect(() => {
@@ -103,14 +102,6 @@ function KeycapModel({
           meshesRef.current.keycap.push(child);
           // Apply current visibility immediately
           child.visible = visibility?.keycap ?? true;
-        } else if (mat.name === "stickermaterial") {
-          newMat.map = texture;
-          newMat.color.set("#ffffff");
-          newMat.transparent = true;
-          newMat.alphaTest = 0.1;
-          newMat.depthWrite = false;
-          meshesRef.current.sticker.push(child);
-          child.visible = visibility?.keycap ?? true; // sticker visibility follows keycap
         } else if (mat.name === "SwitchColor") {
           newMat.color.set(switchColor);
           child.visible = visibility?.switch ?? true; // apply current switch visibility
@@ -135,9 +126,9 @@ function KeycapModel({
   // Update visibility
   useEffect(() => {
     if (!modelRef.current) return;
-    const { keycap, sticker, switchObject, casing, chain } = meshesRef.current;
+    const { keycap, switchObject, casing, chain } = meshesRef.current;
 
-    keycap.concat(sticker).forEach((m) => (m.visible = visibility?.keycap ?? true));
+    keycap.forEach((m) => (m.visible = visibility?.keycap ?? true));
     switchObject.forEach((o) => (o.visible = visibility?.switch ?? true));
     casing.forEach((m) => (m.visible = visibility?.casing ?? true));
     chain.forEach((m) => (m.visible = visibility?.chain ?? true));
@@ -235,4 +226,4 @@ export default function KeycapViewer({
 }
 
 // Preload GLTF
-useGLTF.preload("/models/keycap3.glb");
+useGLTF.preload("/models/keycap9.glb");

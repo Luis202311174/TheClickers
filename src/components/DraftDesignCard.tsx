@@ -14,12 +14,10 @@ export type DraftDesignStatus =
 
 type Design = {
   id: string;
-  preferred_sticker: string;
   description: string;
   design_image_url?: string | null;
   status: DraftDesignStatus;
 
-  // optional (to align with preorder-like extensibility)
   keycap_color?: string;
   switch_color?: string;
   case_color?: string;
@@ -56,9 +54,9 @@ export default function DraftDesignCard({
       <div className="relative aspect-square bg-gray-100 overflow-hidden">
         <Image
           src={imageSrc}
-          alt={design.preferred_sticker}
+          alt="Customer Design"
           fill
-          className="object-cover transition duration-300"
+          className="object-cover"
         />
       </div>
 
@@ -71,13 +69,14 @@ export default function DraftDesignCard({
 
       {/* INFO */}
       <div className="p-4 flex flex-col flex-1">
+
         <p className="text-sm text-gray-500 mb-1">
-          Draft Design
+          Custom Design
         </p>
 
-        <h3 className="font-bold text-lg mb-2">
-          {design.preferred_sticker}
-        </h3>
+        <p className="font-semibold text-lg mb-2">
+          Design #{design.id.slice(0, 6)}
+        </p>
 
         <p className="text-sm text-gray-500 line-clamp-3 mb-3">
           {design.description}
